@@ -65,6 +65,23 @@ app.put("/mahasiswa", (req, res) => {
   });
 });
 
+app.patch("/mahasiswa/:id", (req, res)=> {
+  const{npm, nama_lengkap, kelas, jenis_kelamin} = req.body;
+  const sql = `UPDATE tbl_mahasiswa SET nama_lengkap = '${nama_lengkap}', kelas = '${kelas}', jenis_kelamin = '${jenis_kelamin}' WHERE npm = ${npm}`;
+  db.query(sql, (err, fields) => {
+    if (err) response(500, "invalid", "err", res);
+    if (fields?.affectedRows) {
+      const data = {
+        isSuccess: fields.affectedRows,
+        message: fields.message,
+      };
+      response(200, data, "Successfully to Update Data", res);
+    } else {
+      console.log(404, "user not found", "error", res);
+    }
+  });
+})
+
 app.delete("/mahasiswa/:npm", (req, res) => {
   const npm = req.params.npm;
   const sql = "DELETE FROM tbl_mahasiswa WHERE npm = ?";

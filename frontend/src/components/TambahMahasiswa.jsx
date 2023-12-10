@@ -83,9 +83,9 @@ const TambahMahasiswa = ({ updateData }) => {
           placeholder="Jenis Kelamin"
         />
         <button
-          className="bg-blue-500 p-3 rounded-md text-white "
+          className="bg-blue-500 p-3 rounded-md text-white w-15 hover:bg-blue-700 "
           type="submit">
-          Tambahkan
+          Add
         </button>
       </form>
     </div>

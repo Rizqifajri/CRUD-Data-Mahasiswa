@@ -1,22 +1,45 @@
 import React, { useState, useEffect } from "react";
 import TambahMahasiswa from "./TambahMahasiswa";
+import EditMahasiswa from "./EditMahasiswa";
 
 const TableMahasiswa = () => {
   const [mahasiswa, setMahasiswa] = useState([]);
+  const [showPopUp, setShowPopUp] = useState(false);
+  const [selectedMahasiswa, setSelectedMahasiswa] = useState(null);
 
-  const handleEdit = async (updateData) => {
+  const handleEdit = (id) => {
+    const selected = mahasiswa.find((item) => item.id === id);
+    if (selected) {
+      setSelectedMahasiswa(selected);
+      setShowPopUp(true);
+    } else {
+      console.log("Tidak ada mahasiswa dengan ID tersebut");
+    }
+  };
+
+  const closePopUp = () => {
+    setShowPopUp(false);
+    setSelectedMahasiswa(null);
+  };
+
+  const handleEditSubmit = async (updatedData) => {
     try {
-      const response = await fetch(`http://localhost:3000/mahasiswa/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updateData),
-      });
+      const response = await fetch(
+        `http://localhost:3000/mahasiswa/${updatedData.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedData),
+        }
+      );
 
       if (response.ok) {
         console.log("Data mahasiswa berhasil diubah");
-        (updateData)
+        alert("Update Successfull!")
+        closePopUp(); // Tutup popup setelah berhasil
+        updateMahasiswa(); // Refresh data setelah pengubahan berhasil
       } else {
         console.log("Gagal mengubah data mahasiswa");
       }
@@ -25,28 +48,26 @@ const TableMahasiswa = () => {
     }
   };
 
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:3000/mahasiswa/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
- const handleDelete = async (id) => {
-   try {
-     const response = await fetch(`http://localhost:3000/mahasiswa/${id}`, {
-       method: "DELETE",
-       headers: {
-         "Content-Type": "application/json",
-       },
-     });
-
-     if (response.ok) {
-       console.log("Data berhasil dihapus");
-       // Refresh data setelah penghapusan berhasil
-       updateMahasiswa();
-     } else {
-       console.log("Gagal menghapus data mahasiswa");
-     }
-   } catch (err) {
-     console.error("Terjadi kesalahan:", err);
-   }
- };
-
+      if (response.ok) {
+        console.log("Data berhasil dihapus");
+        // Refresh data setelah penghapusan berhasil
+        updateMahasiswa();
+      } else {
+        console.log("Gagal menghapus data mahasiswa");
+      }
+    } catch (err) {
+      console.error("Terjadi kesalahan:", err);
+    }
+  };
 
   const fetchDataMahasiswa = async () => {
     try {
@@ -74,6 +95,16 @@ const TableMahasiswa = () => {
 
   return (
     <>
+      {showPopUp && (
+        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-500 bg-opacity-50">
+          <EditMahasiswa
+            showPopUp={showPopUp}
+            closePopUp={closePopUp}
+            selectedMahasiswa={selectedMahasiswa}
+            handleEditSubmit={handleEditSubmit}
+          />
+        </div>
+      )}
       <TambahMahasiswa updateData={updateMahasiswa} />
       <table className="min-w-full divide-y divide-gray-200 mt-10">
         <thead>
@@ -99,8 +130,8 @@ const TableMahasiswa = () => {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {mahasiswa.map((item) => (
-            <tr key={item}>
+          {mahasiswa.map((item, i) => (
+            <tr key={i}>
               <td className="px-6 py-4 whitespace-nowrap">{item.id}</td>
               <td className="px-6 py-4 whitespace-nowrap">{item.npm}</td>
               <td className="px-6 py-4 whitespace-nowrap">
@@ -111,15 +142,18 @@ const TableMahasiswa = () => {
                 {item.jenis_kelamin}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <button 
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2"
-                onClick={()=>{handleEdit(item.id)}}>
+                <button
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2"
+                  onClick={() => {
+                    handleEdit(item.id);
+                  }}>
                   Edit
                 </button>
-                <button 
-                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                onClick={()=>{handleDelete(item.npm)}}
-                >
+                <button
+                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                  onClick={() => {
+                    handleDelete(item.npm);
+                  }}>
                   Delete
                 </button>
               </td>
